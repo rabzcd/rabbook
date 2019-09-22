@@ -6,7 +6,7 @@
   <link href="/rabbook/atom.xml" rel="self"/>
   
   <link href="https://rabzcd.github.io/rabbook/"/>
-  <updated>2019-09-21T08:29:21.270Z</updated>
+  <updated>2019-09-22T00:40:30.870Z</updated>
   <id>https://rabzcd.github.io/rabbook/</id>
   
   <author>
@@ -17,13 +17,17 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>test_my_site</title>
-    <link href="https://rabzcd.github.io/rabbook/2019/09/20/test-my-site/"/>
-    <id>https://rabzcd.github.io/rabbook/2019/09/20/test-my-site/</id>
+    <title>CountDownLatch详解</title>
+    <link href="https://rabzcd.github.io/rabbook/2019/09/20/countdown-latch/"/>
+    <id>https://rabzcd.github.io/rabbook/2019/09/20/countdown-latch/</id>
     <published>2019-09-20T07:38:39.000Z</published>
-    <updated>2019-09-21T08:29:21.270Z</updated>
+    <updated>2019-09-22T00:40:30.870Z</updated>
+    
+    <content type="html"><![CDATA[<p>CountDownLatch 类位于java.util.concurrent包下，利用它可以实现类似计数器的功能。比如有一个任务A，它要等待其他4个任务执行完毕之后才能执行，此时就可以利用CountDownLatch来实现这种功能了。</p><a id="more"></a><p>CountDownLatch是通过一个计数器来实现的，计数器的初始值为线程的数量。每当一个线程完成了自己的任务后，计数器的值就会减1。当计数器值到达0时，它表示所有的线程已经完成了任务，然后在闭锁上等待的线程就可以恢复执行任务</p><h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><p>CountDownLatch主要有两个方法：countDown()和await()。countDown()方法用于使计数器减一，await()方法则使调用该方法的线程处于等待状态</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args) &#123;</span><br><span class="line"></span><br><span class="line">int count = 2;</span><br><span class="line"></span><br><span class="line">//指定数量</span><br><span class="line">CountDownLatch latch = new CountDownLatch(count);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(int i = 0; i &lt; count; i++) &#123;</span><br><span class="line">new Thread(new <span class="function"><span class="title">Runnable</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">@Override</span><br><span class="line">public void <span class="function"><span class="title">run</span></span>() &#123;</span><br><span class="line">System.out.println(Thread.currentThread().getName() + <span class="string">",子线程执行..."</span>);</span><br><span class="line">try &#123;</span><br><span class="line">//模拟耗时操作</span><br><span class="line">Thread.sleep(1000); </span><br><span class="line">&#125; catch (InterruptedException e) &#123;</span><br><span class="line">e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line">System.out.println(Thread.currentThread().getName() + <span class="string">",子线程执行完毕..."</span>);</span><br><span class="line"></span><br><span class="line">//计数器-1</span><br><span class="line">latch.countDown();</span><br><span class="line">&#125;</span><br><span class="line">&#125;).start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">try &#123;</span><br><span class="line">//等待</span><br><span class="line">latch.await();</span><br><span class="line">&#125; catch (InterruptedException e) &#123;</span><br><span class="line">e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">"两个子线程执行完毕,主线程执行"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>输出结果</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Thread-1,子线程执行...</span><br><span class="line">Thread-0,子线程执行...</span><br><span class="line">Thread-1,子线程执行完毕...</span><br><span class="line">Thread-0,子线程执行完毕...</span><br><span class="line">两个子线程执行完毕,主线程执行</span><br></pre></td></tr></table></figure><h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><ol><li>任务拆分<br>CountDownLatch非常适合于对任务进行拆分，使其并行执行，比如某个任务执行2s，其对数据的请求可以分为五个部分，那么就可以将这个任务拆分为5个子任务，分别交由五个线程执行，执行完成之后再由主线程进行汇总，此时，总的执行时间将决定于执行最慢的任务，平均来看，还是大大减少了总的执行时间</li><li>图片获取<br>使用某些外部链接请求数据的时候，比如图片。在本人所从事的项目中就有类似的情况，因为我们使用的图片服务只提供了获取单个图片的功能，而每次获取图片的时间不等，一般都需要1.5s~2s。当我们需要批量获取图片的时候，比如列表页需要展示一系列的图片，如果使用单个线程顺序获取，那么等待时间将会极长，此时我们就可以使用CountDownLatch对获取图片的操作进行拆分，并行的获取图片，这样也就缩短了总的获取时间</li></ol><h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><p><a href="https://www.jianshu.com/p/128476015902" target="_blank" rel="noopener">CountDownLatch详解</a></p>]]></content>
     
     <summary type="html">
+    
+      &lt;p&gt;CountDownLatch 类位于java.util.concurrent包下，利用它可以实现类似计数器的功能。比如有一个任务A，它要等待其他4个任务执行完毕之后才能执行，此时就可以利用CountDownLatch来实现这种功能了。&lt;/p&gt;
     
     </summary>
     
@@ -37,26 +41,7 @@
     
       <category term="j.u.c" scheme="https://rabzcd.github.io/rabbook/tags/j-u-c/"/>
     
-      <category term="阻塞队列" scheme="https://rabzcd.github.io/rabbook/tags/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="https://rabzcd.github.io/rabbook/2019/09/20/hello-world/"/>
-    <id>https://rabzcd.github.io/rabbook/2019/09/20/hello-world/</id>
-    <published>2019-09-20T05:51:56.828Z</published>
-    <updated>2019-09-21T08:31:26.926Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><a id="more"></a><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;documentation&lt;/a&gt; for more info. If you get any problems when using Hexo, you can find the answer in &lt;a href=&quot;https://hexo.io/docs/troubleshooting.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;troubleshooting&lt;/a&gt; or you can ask me on &lt;a href=&quot;https://github.com/hexojs/hexo/issues&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
-    
-    </summary>
-    
-    
+      <category term="CountDownLatch" scheme="https://rabzcd.github.io/rabbook/tags/CountDownLatch/"/>
     
   </entry>
   
